@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# run ec2-metadata-mock with a generated config on the local system
+
+CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# get the role ARN as input.
+role="${1}"
+# validate that it is a proper role to attempt to assume
+if ! (echo "${role}" | grep -Eq "^arn:aws:iam::\d{12}:role\/[-_a-zA-Z0-9]+$"); then
+  echo "Error: no role or invalid role provided."
+  exit 1
+fi
+exit 0
+# check if loopback exists
+needSudo=""
+if [[ $(id -u) != 0 ]]; then
+  needSudo="sudo"
+fi
+# The virtual interface can just be created over and over
+# without any issues so we don't need to check if it already exists
+if [[ $(uname -s) == "Linux" ]]; then
+  "${needSudo}" ifconfig lo:0 169.254.169.254 netmask 255.255.255.255
+elif [[ $(uname -s) == "Darwin" ]]; then
+  "${needSudo}" ifconfig lo0 alias 169.254.169.254
+else
+  echo "Could not determine OS... Exiting"
+  exit 1
+fi
+
+# generate config
+[[ -d ${HOME}/.aws/ ]] || mkdir -p "${HOME}"/.aws/
+python3 "${CURRENT_DIR}"/generate_mock_config.py --roleArn "${role}"
+
+"${needSudo}" ec2-metadata-mock -p 80 -n 169.254.169.254 -c "${HOME}"/.aws/mock_config.json
