@@ -11,6 +11,13 @@ if ! (echo "${role}" | grep -Eq "^arn:aws:iam::\d{12}:role\/[-_a-zA-Z0-9]+$"); t
   exit 1
 fi
 
+# ensure that we have the mock binary installed and
+# available in the user path.
+if ! command -v ec2-metadata-mock > /dev/null 2>&1; then
+  echo "Error: ec2-metadata-mock binary not found in PATH."
+  exit 1
+fi
+
 # check if we are already root
 needSudo=""
 if [[ $(id -u) != 0 ]]; then
