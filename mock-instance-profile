@@ -10,12 +10,13 @@ if ! (echo "${role}" | grep -Eq "^arn:aws:iam::\d{12}:role\/[-_a-zA-Z0-9]+$"); t
   echo "Error: no role or invalid role provided."
   exit 1
 fi
-exit 0
-# check if loopback exists
+
+# check if we are already root
 needSudo=""
 if [[ $(id -u) != 0 ]]; then
   needSudo="sudo"
 fi
+
 # The virtual interface can just be created over and over
 # without any issues so we don't need to check if it already exists
 if [[ $(uname -s) == "Linux" ]]; then
