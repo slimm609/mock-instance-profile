@@ -6,7 +6,7 @@ CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # get the role ARN as input.
 role="${1}"
 # validate that it is a proper role to attempt to assume
-if ! (echo "${role}" | grep -Eq "^arn:aws:iam::\d{12}:role\/[-_a-zA-Z0-9]+$"); then
+if ! (echo "${role}" | grep -Eq "^arn:(aws|aws-us-gov|aws-cn):iam::\d{12}:role\/[-_a-zA-Z0-9]+$"); then
   echo "Error: no role or invalid role provided."
   exit 1
 fi
